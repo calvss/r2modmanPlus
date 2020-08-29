@@ -12,14 +12,16 @@ export default class GameRunner {
     public static playModded(ror2Directory: string, onComplete: (err: R2Error | null) => void) {
         Logger.Log(LogSeverity.INFO, 'Launching modded');
         const settings = ManagerSettings.getSingleton();
-        const steamDir: string | R2Error = GameDirectoryResolver.getSteamDirectory();
+        const steamDir: string | R2Error = GameDirectoryResolver.getDirectory();
         if (steamDir instanceof R2Error) {
             onComplete(steamDir);
             return;
         }
-        Logger.Log(LogSeverity.INFO, `Steam directory is: ${steamDir}`);
-        Logger.Log(LogSeverity.INFO, `Running command: ${steamDir}.exe -applaunch 632360 --doorstop-enable true --doorstop-target r2modman\\BepInEx\\core\\BepInEx.Preloader.dll`);
-        exec(`"${steamDir}/Steam.exe" -applaunch 632360 --doorstop-enable true --doorstop-target r2modman\\BepInEx\\core\\BepInEx.Preloader.dll ${settings.launchParameters}`, (err => {
+	const drive = steamDir.substring(0,2);
+	Logger.Log(LogSeverity.INFO, `Game Drive is: ${drive}`);
+        Logger.Log(LogSeverity.INFO, `Game directory is: ${steamDir}`);
+        Logger.Log(LogSeverity.INFO, `Running command: cmd /C "${drive} & cd ${steamDir} & steamclient_loader.exe"`);
+        exec(`cmd /C "${drive} & cd ${steamDir} & steamclient_loader.exe"`, (err => {
             if (err !== null) {
                 Logger.Log(LogSeverity.ACTION_STOPPED, 'Error was thrown whilst starting modded');
                 Logger.Log(LogSeverity.ERROR, err.message);
